@@ -1,1 +1,910 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000810;
+    color: #00e5ff;
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.2; }
+    100% { opacity: 1; }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 24px 0 20px;
+  }
+
+  .header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px, 4vw, 32px);
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #00e5ff;
+    text-shadow: 0 0 20px #00e5ff88, 0 0 60px #00e5ff33;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 20px #00e5ff88, 0 0 60px #00e5ff33; }
+    50% { text-shadow: 0 0 40px #00e5ffcc, 0 0 100px #00e5ff55; }
+  }
+
+  .header .subtitle {
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: #7ecfff;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  .header .by-line {
+    font-size: 11px;
+    color: #00e5ff66;
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* HOLOGRAM DISPLAY */
+  .hologram-stage {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hologram-canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .hologram-figure {
+    position: absolute;
+    width: 140px;
+    height: 280px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-12px); }
+  }
+
+  .scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00e5ff44, #00e5ffcc, #00e5ff44, transparent);
+    animation: scan 3s linear infinite;
+    left: 0;
+  }
+
+  @keyframes scan {
+    0% { top: 0; opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .ring {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 30px;
+    border: 1px solid #00e5ff33;
+    border-radius: 50%;
+    animation: ring-pulse 2s ease-in-out infinite;
+  }
+
+  .ring:nth-child(2) { width: 240px; height: 40px; animation-delay: 0.3s; opacity: 0.5; }
+  .ring:nth-child(3) { width: 300px; height: 50px; animation-delay: 0.6s; opacity: 0.3; }
+
+  @keyframes ring-pulse {
+    0%, 100% { border-color: #00e5ff33; }
+    50% { border-color: #00e5ff88; }
+  }
+
+  /* CONTROL PANEL */
+  .control-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .panel-card {
+    background: rgba(0, 229, 255, 0.04);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: 10px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .panel-card:hover {
+    border-color: rgba(0, 229, 255, 0.5);
+    background: rgba(0, 229, 255, 0.08);
+  }
+
+  .panel-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(180deg, #00e5ff, #0080ff);
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #00e5ffaa;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .freq-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0,229,255,0.08);
+  }
+
+  .freq-item:last-child { border-bottom: none; }
+
+  .freq-label { font-size: 10px; color: #7ecfff; }
+
+  .freq-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: #00e5ff;
+    background: rgba(0,229,255,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00ff88;
+    margin-right: 6px;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .status-dot.orange { background: #ff8800; animation-delay: 0.5s; }
+  .status-dot.blue { background: #00e5ff; animation-delay: 1s; }
+
+  /* MODE SELECTOR */
+  .mode-section {
+    margin: 16px 0;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #00e5ff66;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .mode-btn {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 8px;
+    padding: 10px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #7ecfff;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Exo 2', sans-serif;
+  }
+
+  .mode-btn .icon { font-size: 18px; display: block; margin-bottom: 4px; }
+
+  .mode-btn:hover, .mode-btn.active {
+    background: rgba(0,229,255,0.15);
+    border-color: #00e5ff;
+    color: #00e5ff;
+    box-shadow: 0 0 12px rgba(0,229,255,0.3);
+  }
+
+  .mode-btn.active {
+    background: rgba(0,229,255,0.2);
+  }
+
+  /* PERFORMANCE METRICS */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .metric-card {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .metric-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #00e5ff;
+    display: block;
+  }
+
+  .metric-label {
+    font-size: 9px;
+    color: #7ecfff88;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 3px;
+  }
+
+  /* POWER BAR */
+  .power-section {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 10px;
+    padding: 14px;
+    margin: 12px 0;
+  }
+
+  .power-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+  }
+
+  .power-label { font-size: 10px; color: #7ecfff; width: 70px; flex-shrink: 0; }
+
+  .power-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(0,229,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .power-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    animation: power-animate 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes power-animate {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+
+  .power-val { font-family: 'Orbitron', monospace; font-size: 9px; color: #00e5ff; width: 38px; text-align: right; }
+
+  /* INTERACTIVE CONTROLS */
+  .controls-row {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    flex: 1;
+    min-width: 100px;
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 8px;
+    padding: 10px 8px;
+    color: #00e5ff;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .ctrl-btn:hover {
+    background: rgba(0,229,255,0.2);
+    box-shadow: 0 0 16px rgba(0,229,255,0.4);
+    border-color: #00e5ff;
+  }
+
+  .ctrl-btn:active { transform: scale(0.97); }
+
+  .ctrl-btn.danger {
+    border-color: rgba(255,80,80,0.3);
+    color: #ff5050;
+  }
+
+  .ctrl-btn.danger:hover {
+    background: rgba(255,80,80,0.15);
+    box-shadow: 0 0 16px rgba(255,80,80,0.4);
+  }
+
+  /* APPLICATIONS */
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin: 10px 0;
+  }
+
+  .app-chip {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 6px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 8px;
+    color: #7ecfff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .app-chip:hover {
+    border-color: #00e5ff;
+    color: #00e5ff;
+    background: rgba(0,229,255,0.1);
+  }
+
+  .app-chip .app-icon { font-size: 16px; display: block; margin-bottom: 3px; }
+
+  /* TERMINAL LOG */
+  .terminal {
+    background: #000508;
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #00e5ff88;
+    height: 90px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .terminal::before {
+    content: '● SYSTEM LOG';
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: #00e5ff44;
+  }
+
+  .log-line { margin: 2px 0; animation: log-appear 0.3s ease; }
+
+  @keyframes log-appear {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .log-green { color: #00ff88; }
+  .log-yellow { color: #ffcc00; }
+  .log-red { color: #ff5555; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px 0 8px;
+    font-size: 9px;
+    color: #00e5ff33;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Slider */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(0,229,255,0.15);
+    border-radius: 2px;
+    outline: none;
+    margin: 8px 0;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #00e5ff;
+    cursor: pointer;
+    box-shadow: 0 0 8px #00e5ff;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+  }
+
+  .slider-lbl { font-size: 10px; color: #7ecfff; width: 80px; flex-shrink: 0; }
+  .slider-val { font-family: 'Orbitron', monospace; font-size: 10px; color: #00e5ff; width: 40px; text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="starfield" id="starfield"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="subtitle">Interactive Touchable</div>
+    <h1>HOLOGRAM SYSTEM</h1>
+    <div class="subtitle">Digital-to-Physical Engine · v2.4.6</div>
+    <div class="by-line">Designed by Krishna · Prototype Interface</div>
+  </div>
+
+  <!-- HOLOGRAM STAGE -->
+  <div class="hologram-stage">
+    <canvas class="hologram-canvas" id="holoCanvas"></canvas>
+    <div class="scan-line"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+  </div>
+
+  <!-- MODE BUTTONS -->
+  <div class="mode-section">
+    <div class="section-title">// Hologram Mode</div>
+    <div class="mode-grid">
+      <div class="mode-btn active" onclick="setMode(this,'Static')"><span class="icon">🧊</span>Static</div>
+      <div class="mode-btn" onclick="setMode(this,'Dynamic')"><span class="icon">⚡</span>Dynamic</div>
+      <div class="mode-btn" onclick="setMode(this,'Interactive')"><span class="icon">👋</span>Interactive</div>
+      <div class="mode-btn" onclick="setMode(this,'HoloUI')"><span class="icon">🖥</span>Holo UI</div>
+      <div class="mode-btn" onclick="setMode(this,'Object')"><span class="icon">🚗</span>Object</div>
+    </div>
+  </div>
+
+  <!-- PERFORMANCE METRICS -->
+  <div class="section-title">// Performance Metrics</div>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <span class="metric-value" id="res-val">0.1mm</span>
+      <div class="metric-label">Resolution</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-value" id="fps-val">120</span>
+      <div class="metric-label">Refresh Rate</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-value" id="haptic-val">100K</span>
+      <div class="metric-label">Haptic Points</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-value" id="lat-val">&lt;5ms</span>
+      <div class="metric-label">Latency</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-value" id="color-val">16.7M</span>
+      <div class="metric-label">Color Depth</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-value" id="size-val">2m²</span>
+      <div class="metric-label">Proj. Size</div>
+    </div>
+  </div>
+
+  <!-- CONTROL PANELS -->
+  <div class="control-panel">
+    <div class="panel-card">
+      <div class="panel-title">⚡ Frequency Regimes</div>
+      <div class="freq-item">
+        <span class="freq-label"><span class="status-dot"></span>Matter Print</span>
+        <span class="freq-value">2.45 GHz</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label"><span class="status-dot orange"></span>Matter Lock</span>
+        <span class="freq-value">17.3 GHz</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label"><span class="status-dot blue"></span>Holo Light</span>
+        <span class="freq-value">380–750 THz</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label"><span class="status-dot"></span>Haptic Field</span>
+        <span class="freq-value">24 GHz</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label"><span class="status-dot orange"></span>Data Link</span>
+        <span class="freq-value">60 GHz</span>
+      </div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">🌡 Emitter Array</div>
+      <div class="freq-item">
+        <span class="freq-label">Density</span>
+        <span class="freq-value">10K–100K/cm²</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label">Size</span>
+        <span class="freq-value">10–50 µm</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label">Light Out</span>
+        <span class="freq-value">1–10 mW</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label">Haptic Out</span>
+        <span class="freq-value">0.1–5.0 N/cm²</span>
+      </div>
+      <div class="freq-item">
+        <span class="freq-label">Lifetime</span>
+        <span class="freq-value">10,000+ hrs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- POWER SYSTEMS -->
+  <div class="power-section">
+    <div class="section-title" style="margin-bottom:10px;">// Power & Output</div>
+    <div class="power-bar-wrap">
+      <span class="power-label">Matter Print</span>
+      <div class="power-bar-bg"><div class="power-bar-fill" style="width:50%; background: linear-gradient(90deg,#00e5ff,#0080ff);"></div></div>
+      <span class="power-val">500W</span>
+    </div>
+    <div class="power-bar-wrap">
+      <span class="power-label">Matter Lock</span>
+      <div class="power-bar-bg"><div class="power-bar-fill" style="width:50%; background: linear-gradient(90deg,#ff8800,#ffcc00);"></div></div>
+      <span class="power-val">500W</span>
+    </div>
+    <div class="power-bar-wrap">
+      <span class="power-label">Holo Light</span>
+      <div class="power-bar-bg"><div class="power-bar-fill" style="width:100%; background: linear-gradient(90deg,#7c3aed,#00e5ff);"></div></div>
+      <span class="power-val">1-2 kW</span>
+    </div>
+    <div class="power-bar-wrap">
+      <span class="power-label">Haptic Field</span>
+      <div class="power-bar-bg"><div class="power-bar-fill" style="width:50%; background: linear-gradient(90deg,#00ff88,#00cc66);"></div></div>
+      <span class="power-val">500W</span>
+    </div>
+    <div class="power-bar-wrap">
+      <span class="power-label">Data Link</span>
+      <div class="power-bar-bg"><div class="power-bar-fill" style="width:10%; background: linear-gradient(90deg,#00e5ff44,#00e5ff);"></div></div>
+      <span class="power-val">100W</span>
+    </div>
+  </div>
+
+  <!-- SLIDERS -->
+  <div class="panel-card" style="margin:12px 0;">
+    <div class="panel-title">🎛 Real-Time Controls</div>
+    <div class="slider-row">
+      <span class="slider-lbl">Intensity</span>
+      <input type="range" min="0" max="100" value="75" id="sl-intensity" oninput="document.getElementById('sv-intensity').textContent=this.value+'%'">
+      <span class="slider-val" id="sv-intensity">75%</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-lbl">Haptic Force</span>
+      <input type="range" min="0" max="100" value="50" id="sl-haptic" oninput="document.getElementById('sv-haptic').textContent=(this.value*0.05).toFixed(1)+' N'">
+      <span class="slider-val" id="sv-haptic">2.5 N</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-lbl">Refresh Rate</span>
+      <input type="range" min="60" max="120" step="10" value="120" id="sl-fps" oninput="document.getElementById('sv-fps').textContent=this.value+'Hz';document.getElementById('fps-val').textContent=this.value">
+      <span class="slider-val" id="sv-fps">120Hz</span>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="controls-row">
+    <div class="ctrl-btn" onclick="activateSystem()">▶ Activate System</div>
+    <div class="ctrl-btn" onclick="printArray()">⬡ Print Emitter Array</div>
+    <div class="ctrl-btn" onclick="enableTouch()">✋ Enable Touch</div>
+    <div class="ctrl-btn danger" onclick="emergencyStop()">⚠ Emergency Stop</div>
+  </div>
+
+  <!-- APPLICATIONS -->
+  <div class="section-title">// Possible Applications</div>
+  <div class="apps-grid">
+    <div class="app-chip"><span class="app-icon">🪖</span>Military Training</div>
+    <div class="app-chip"><span class="app-icon">🫀</span>Medical Sim</div>
+    <div class="app-chip"><span class="app-icon">⚙️</span>Engineering</div>
+    <div class="app-chip"><span class="app-icon">🎮</span>Entertainment</div>
+    <div class="app-chip"><span class="app-icon">💬</span>Communication</div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="terminal" id="terminal">
+    <div class="log-line log-green">[00:00:01] System initialized. Krishna Hologram v2.4.6</div>
+    <div class="log-line">[00:00:02] Emitter array substrate: Copper/Graphene composite</div>
+    <div class="log-line log-yellow">[00:00:03] Magnetron units online — 2.45 GHz + 17.3 GHz</div>
+    <div class="log-line">[00:00:04] RF Amplifier active: 2.4–18 GHz, 3kW</div>
+    <div class="log-line log-green">[00:00:05] Holographic field ready. Awaiting command...</div>
+  </div>
+
+  <div class="footer">
+    Krishna's Interactive Touchable Hologram System · Prototype v2.4.6 · Non-ionizing · Eye-safe · Skin-safe
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('holoCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], frame = 0;
+let activeMode = 'Static';
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+}
+
+resize();
+window.addEventListener('resize', () => { resize(); initParticles(); });
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = W / 2 + (Math.random() - 0.5) * 120;
+    this.y = Math.random() * H;
+    this.vy = -0.4 - Math.random() * 0.6;
+    this.vx = (Math.random() - 0.5) * 0.3;
+    this.life = Math.random();
+    this.maxLife = 0.7 + Math.random() * 0.3;
+    this.size = 1 + Math.random() * 2;
+    this.hue = 180 + Math.random() * 60;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life += 0.008;
+    if (this.life > this.maxLife || this.y < 0) this.reset();
+  }
+  draw() {
+    const alpha = Math.sin(this.life / this.maxLife * Math.PI) * 0.8;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = `hsl(${this.hue},100%,70%)`;
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = `hsl(${this.hue},100%,70%)`;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function initParticles() {
+  particles = Array.from({ length: 120 }, () => new Particle());
+}
+
+initParticles();
+
+function drawHologram() {
+  ctx.clearRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H / 2;
+
+  // Background grid
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,229,255,0.05)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < W; x += 30) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 30) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  // Human silhouette
+  const t = frame * 0.018;
+  const floatY = Math.sin(t) * 10;
+  const bodyX = cx, bodyY = cy - 20 + floatY;
+
+  // Glow aura
+  const grad = ctx.createRadialGradient(bodyX, bodyY, 0, bodyX, bodyY, 100);
+  grad.addColorStop(0, 'rgba(0,229,255,0.15)');
+  grad.addColorStop(1, 'rgba(0,229,255,0)');
+  ctx.beginPath();
+  ctx.arc(bodyX, bodyY, 100, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Body wireframe
+  ctx.save();
+  ctx.strokeStyle = `rgba(0,229,255,${0.5 + Math.sin(t*2)*0.2})`;
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = '#00e5ff';
+
+  // Head
+  ctx.beginPath();
+  ctx.arc(bodyX, bodyY - 90, 28, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Body wireframe lines
+  const body = [
+    [bodyX, bodyY - 62], [bodyX, bodyY + 60],
+    [bodyX - 38, bodyY - 40], [bodyX + 38, bodyY - 40],
+    [bodyX - 20, bodyY + 60], [bodyX - 14, bodyY + 120],
+    [bodyX + 20, bodyY + 60], [bodyX + 14, bodyY + 120],
+    [bodyX - 38, bodyY - 10], [bodyX - 60, bodyY + 40],
+    [bodyX + 38, bodyY - 10], [bodyX + 60, bodyY + 40],
+  ];
+
+  const segs = [
+    [0,1],[2,3],[0,2],[0,3],[1,4],[4,5],[1,6],[6,7],[2,8],[8,9],[3,10],[10,11]
+  ];
+
+  segs.forEach(([a, b]) => {
+    ctx.beginPath();
+    ctx.moveTo(body[a][0], body[a][1]);
+    ctx.lineTo(body[b][0], body[b][1]);
+    ctx.stroke();
+  });
+
+  // Horizontal scan lines on body
+  ctx.globalAlpha = 0.15;
+  ctx.lineWidth = 0.5;
+  for (let i = -100; i < 130; i += 5) {
+    ctx.beginPath();
+    ctx.moveTo(bodyX - 50, bodyY + i - 10);
+    ctx.lineTo(bodyX + 50, bodyY + i - 10);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  // Particles
+  particles.forEach(p => { p.update(); p.draw(); });
+
+  // Base projection cone
+  ctx.save();
+  const coneGrad = ctx.createLinearGradient(cx, H, cx, H - 80);
+  coneGrad.addColorStop(0, 'rgba(0,229,255,0.25)');
+  coneGrad.addColorStop(1, 'rgba(0,229,255,0)');
+  ctx.beginPath();
+  ctx.moveTo(cx - 10, H);
+  ctx.lineTo(cx - 80, H - 80);
+  ctx.lineTo(cx + 80, H - 80);
+  ctx.lineTo(cx + 10, H);
+  ctx.closePath();
+  ctx.fillStyle = coneGrad;
+  ctx.fill();
+  ctx.restore();
+
+  frame++;
+  requestAnimationFrame(drawHologram);
+}
+
+drawHologram();
+
+// Stars
+const sf = document.getElementById('starfield');
+for (let i = 0; i < 60; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.animationDelay = Math.random() * 3 + 's';
+  s.style.animationDuration = (2 + Math.random() * 3) + 's';
+  s.style.opacity = Math.random() * 0.7;
+  sf.appendChild(s);
+}
+
+function setMode(el, mode) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  activeMode = mode;
+  log(`Hologram mode switched to: ${mode}`, 'yellow');
+}
+
+let logLines = [];
+function log(msg, type = '') {
+  const term = document.getElementById('terminal');
+  const d = document.createElement('div');
+  d.className = 'log-line' + (type ? ' log-' + type : '');
+  const now = new Date();
+  const ts = `[${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}:${String(now.getMilliseconds()).slice(0,2)}]`;
+  d.textContent = `${ts} ${msg}`;
+  term.appendChild(d);
+  while (term.children.length > 7) term.removeChild(term.firstChild);
+  term.scrollTop = term.scrollHeight;
+}
+
+function activateSystem() {
+  log('▶ Activating holographic system...', 'green');
+  setTimeout(() => log('Magnetron 1 online — 2.45 GHz ready', 'green'), 400);
+  setTimeout(() => log('Magnetron 2 online — 17.3 GHz locked', 'green'), 800);
+  setTimeout(() => log('Light engine active — 380-750 THz projection', 'yellow'), 1200);
+  setTimeout(() => log('System FULLY OPERATIONAL ✓', 'green'), 1600);
+}
+
+function printArray() {
+  log('⬡ Initiating emitter array fabrication...', 'yellow');
+  setTimeout(() => log('Voxelization engine: 0.1mm resolution', ''), 500);
+  setTimeout(() => log('Material encoding: Phase/Amplitude/Density', ''), 1000);
+  setTimeout(() => log('Copper/Graphene substrate depositing...', 'yellow'), 1500);
+  setTimeout(() => log('Emitter array printed successfully ✓', 'green'), 2200);
+}
+
+function enableTouch() {
+  log('✋ Enabling haptic feedback field...', 'yellow');
+  setTimeout(() => log('24 GHz phased array activating...', ''), 400);
+  setTimeout(() => log('Focused radiation pressure calibrated', ''), 900);
+  setTimeout(() => log('Ultrasonic vibrotactile feedback: ONLINE', 'green'), 1300);
+  setTimeout(() => log('Touch field active — pressure: 0.1–5.0 N/cm²', 'green'), 1700);
+}
+
+function emergencyStop() {
+  log('⚠ EMERGENCY STOP TRIGGERED!', 'red');
+  setTimeout(() => log('Power cutoff initiated...', 'red'), 200);
+  setTimeout(() => log('RF fields terminated', 'red'), 500);
+  setTimeout(() => log('System safe. All emitters powered down.', 'yellow'), 900);
+}
+</script>
+</body>
+</html>
